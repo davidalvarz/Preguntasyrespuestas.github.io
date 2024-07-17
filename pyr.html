@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Juego de Preguntas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .header, .footer {
+            background-color: #4CAF50;
+            color: #fff;
+            padding: 20px;
+        }
+        .content {
+            padding: 20px;
+        }
+        button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 10px 2px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .hidden {
+            display: none;
+        }
+        .question {
+            margin-top: 20px;
+        }
+        .option {
+            display: block;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .option:hover {
+            background-color: #45a049;
+        }
+        .incorrect {
+            background-color: red !important;
+        }
+    </style>
+    <script>
+        const easyQuestions = [
+            { question: "¿Cuál es el país más grande del mundo?", options: ["China", "Canadá", "Rusia", "Estados Unidos"], answer: "Rusia" },
+            { question: "¿Cuál es el río más largo del mundo?", options: ["Amazonas", "Nilo", "Misisipi", "Yangtsé"], answer: "Nilo" },
+            { question: "¿Qué planeta es conocido como el Planeta Rojo?", options: ["Venus", "Saturno", "Marte", "Júpiter"], answer: "Marte" },
+            { question: "¿Cuál es la moneda oficial de Japón?", options: ["Dólar", "Euro", "Yen", "Won"], answer: "Yen" },
+            { question: "¿Quién pintó la Mona Lisa?", options: ["Vincent van Gogh", "Pablo Picasso", "Leonardo da Vinci", "Claude Monet"], answer: "Leonardo da Vinci" },
+            { question: "¿Cuál es el país con la mayor población del mundo?", options: ["India", "China", "Estados Unidos", "Indonesia"], answer: "China" },
+            { question: "¿Qué científico propuso la teoría de la relatividad?", options: ["Isaac Newton", "Galileo Galilei", "Nikola Tesla", "Albert Einstein"], answer: "Albert Einstein" },
+            { question: "¿Cuál es el océano más grande del mundo?", options: ["Atlántico", "Índico", "Ártico", "Pacífico"], answer: "Pacífico" },
+            { question: "¿Qué gas es necesario para la respiración?", options: ["Nitrógeno", "Oxígeno", "Hidrógeno", "Dióxido de carbono"], answer: "Oxígeno" },
+            { question: "¿Cuál es la capital de Canadá?", options: ["Toronto", "Vancouver", "Montreal", "Ottawa"], answer: "Ottawa" }
+        ];
+
+        const hardQuestions = [
+            { question: "¿En qué año comenzó la Segunda Guerra Mundial?", options: ["1914", "1939", "1945", "1963"], answer: "1939" },
+            { question: "¿Cuál es la fórmula química del agua?", options: ["H2O", "CO2", "O2", "H2"], answer: "H2O" },
+            { question: "¿Quién escribió 'Don Quijote de la Mancha'?", options: ["Lope de Vega", "Miguel de Cervantes", "Federico García Lorca", "Gabriel García Márquez"], answer: "Miguel de Cervantes" },
+            { question: "¿Cuál es el valor de pi (π) aproximadamente?", options: ["2.71", "3.14", "1.62", "1.41"], answer: "3.14" },
+            { question: "¿Cuál es el elemento más abundante en la atmósfera de la Tierra?", options: ["Oxígeno", "Nitrógeno", "Hidrógeno", "Dióxido de carbono"], answer: "Nitrógeno" },
+            { question: "¿Quién pintó 'La última cena'?", options: ["Vincent van Gogh", "Pablo Picasso", "Leonardo da Vinci", "Salvador Dalí"], answer: "Leonardo da Vinci" },
+            { question: "¿Qué país tiene la mayor población del mundo?", options: ["India", "Estados Unidos", "China", "Rusia"], answer: "China" },
+            { question: "¿Cuál es el órgano más grande del cuerpo humano?", options: ["Corazón", "Hígado", "Pulmones", "Piel"], answer: "Piel" },
+            { question: "¿Quién desarrolló la teoría de la relatividad?", options: ["Isaac Newton", "Galileo Galilei", "Nikola Tesla", "Albert Einstein"], answer: "Albert Einstein" },
+            { question: "¿En qué año llegó el hombre a la luna?", options: ["1969", "1972", "1957", "1980"], answer: "1969" }
+        ];
+
+        let currentQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        function showModeSelection() {
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('modeSelectionScreen').classList.remove('hidden');
+        }
+
+        function startGame(mode) {
+            currentQuestions = mode === 'easy' ? easyQuestions : hardQuestions;
+            currentQuestionIndex = 0;
+            score = 0;
+            document.getElementById('modeSelectionScreen').classList.add('hidden');
+            document.getElementById('questionScreen').classList.remove('hidden');
+            showQuestion();
+        }
+
+        function showQuestion() {
+            if (currentQuestionIndex < currentQuestions.length) {
+                document.getElementById('question').innerText = currentQuestions[currentQuestionIndex].question;
+                const optionsContainer = document.getElementById('options');
+                optionsContainer.innerHTML = '';
+                currentQuestions[currentQuestionIndex].options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.classList.add('option');
+                    button.innerText = option;
+                    button.onclick = () => checkAnswer(button, option);
+                    optionsContainer.appendChild(button);
+                });
+            } else {
+                document.getElementById('questionScreen').classList.add('hidden');
+                document.getElementById('scoreScreen').classList.remove('hidden');
+                document.getElementById('finalScore').innerText = `Tu puntuación final es: ${score}`;
+            }
+        }
+
+        function checkAnswer(button, selectedOption) {
+            if (selectedOption === currentQuestions[currentQuestionIndex].answer) {
+                score++;
+            } else {
+                button.classList.add('incorrect');
+            }
+            currentQuestionIndex++;
+            setTimeout(showQuestion, 1000); // Delay to show the incorrect answer in red
+        }
+    </script>
+</head>
+<body>
+    <div class="container" id="startScreen">
+        <div class="header">
+            <h1>Juego de Preguntas</h1>
+        </div>
+        <div class="content">
+            <button onclick="showModeSelection()">Jugar</button>
+        </div>
+    </div>
+
+    <div class="container hidden" id="modeSelectionScreen">
+        <div class="header">
+            <h2>Selecciona el modo de juego</h2>
+        </div>
+        <div class="content">
+            <button onclick="startGame('easy')">Fácil</button>
+            <button onclick="startGame('hard')">Difícil</button>
+        </div>
+    </div>
+
+    <div class="container hidden" id="questionScreen">
+        <div class="header">
+            <h1>Pregunta</h1>
+        </div>
+        <div class="content">
+            <div class="question">
+                <p id="question"></p>
+                <div id="options"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container hidden" id="scoreScreen">
+        <div class="header">
+            <h2>Juego Terminado</h2>
+        </div>
+        <div class="content">
+            <p id="finalScore"></p>
+            <button onclick="window.location.reload()">Jugar de nuevo</button>
